@@ -278,7 +278,6 @@ namespace intelhex
 	    exit(1);
 	}
 
-	truncate(8);				//Truncate each record to length=8 (purely aesthetic)
 	blocks.sort();				//Sort the data blocks by address (ascending)
 
 	os.setf(std::ios::hex, std::ios::basefield);	//Set the stream to ouput hex instead of decimal
