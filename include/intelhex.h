@@ -24,7 +24,7 @@ namespace intelhex
     {
 	//Each line of the hex file generates a block of memory at a particular address
 	// pair<>.first is the address, pair<>.second is the data
-	typedef	uint16_t	element_t;								//Data element
+	typedef	uint8_t	    element_t;								//Data element
 	typedef	uint32_t	address_t;
 	typedef	std::vector<element_t>	data_container;		//Element container
 	typedef	std::pair<address_t, data_container>	dblock;	//Data block container

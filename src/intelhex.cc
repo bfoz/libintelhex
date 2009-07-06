@@ -191,7 +191,7 @@ namespace intelhex
     {
 	FILE	*fp;
 	dblock	*db;		//Temporary pointer
-	unsigned int	hi, lo, address, count, rtype, i;
+	unsigned int	address, count, rtype, i;
 	uint16_t	linear_address(0);
 	uint32_t	a;
 
@@ -211,8 +211,7 @@ namespace intelhex
 		fscanf(fp, "%4x", &address);	//Read in address
 		fscanf(fp, "%2x", &rtype);	//Read type
 
-		unsigned numWords(count/2);	//Convert byte count to word count
-		address /= 2;			//Byte address to word address
+		unsigned numWords(count);	//Convert byte count to word count
 
 		switch(rtype)	//What type of record?
 		{
@@ -221,11 +220,7 @@ namespace intelhex
 			a = (static_cast<uint32_t>(linear_address) << 16) + address;
 			db = add_block(a, numWords);
 			for(i=0; i<numWords; i++)			//Read all of the data bytes
-			{
-				fscanf(fp, "%2x", &lo);			//Low byte
-				fscanf(fp, "%2x", &hi);			//High byte
-				db->second[i] = ((hi<<8)&0xFF00) | (lo&0x00FF);	//Assemble the word
-			}
+			    fscanf(fp, "%2x", (unsigned*)&db->second[i]);
 			break;
 		    case 1:	//EOF
 			break;
@@ -242,7 +237,6 @@ namespace intelhex
 			{
 			    //FIXME	There's a problem
 			}
-
 			break;
 		}
 		fscanf(fp,"%*[^\n]\n");		//Ignore the checksum and the newline
@@ -338,20 +332,20 @@ namespace intelhex
 	    checksum = 0;
 	    os << ':';	//Every line begins with ':'
 	    os.width(2);
-	    os << i->second.size()*2;	//Record length
-	    checksum += i->second.size()*2;
+	    os << i->second.size();				//Length
+	    checksum += i->second.size();
 	    os.width(4);
-	    os << static_cast<uint16_t>(i->first*2);	//Address
-	    checksum += (i->first * 2) + (i->first >> 7);
+	    os << static_cast<uint16_t>(i->first);		//Address
+	    checksum += static_cast<uint8_t>(i->first);		// Low byte
+	    checksum += static_cast<uint8_t>(i->first >> 8);	// High byte
 	    os << "00";											//Record type
 	    for(unsigned j=0; j<i->second.size(); ++j)	//Store the data bytes, LSB first, ASCII HEX
 	    {
 		os.width(2);
-		os << (i->second[j] & 0x00FF);
-		os.width(2);
-		os << ((i->second[j]>>8) & 0x00FF);
-		checksum += static_cast<uint8_t>(i->second[j] & 0x00FF);
-		checksum += static_cast<uint8_t>(i->second[j] >> 8);
+		// OSX (or maybe GCC), seems unable to handle uint8_t
+		//  arguments to a stream
+		os << static_cast<uint16_t>(i->second[j]);
+		checksum += i->second[j];
 	    }
 	    checksum = 0x01 + ~checksum;
 	    os.width(2);
