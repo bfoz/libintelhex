@@ -314,19 +314,20 @@ namespace intelhex
 	os << ":00000001FF\n";			//EOF marker
     }
 
-    // Truncate all of the blocks to a given length
-    void hex_data::truncate(hex_data::size_type len)
+    // Make things pretty
+    //  Truncate blocks to a given length as needed
+    void hex_data::tidy(hex_data::size_type length)
     {
 	for(iterator i=blocks.begin(); i!=blocks.end(); i++)
 	{
-	    if(i->second.size() > len)	//If the block is too long...
+	    if(i->second.size() > length)	//If the block is too long...
 	    {
 		//Make an interator that points to the first element to copy out of i->second
 		data_container::iterator k(i->second.begin());
-		advance(k, len);
+		advance(k, length);
 
 		// Assign the extra elements to a new block and truncate the original
-		blocks[i->first + len].assign(k, i->second.end());
+		blocks[i->first + length].assign(k, i->second.end());
 		i->second.erase(k, i->second.end());
 	    }
 	}

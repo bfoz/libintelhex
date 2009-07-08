@@ -60,7 +60,7 @@ namespace intelhex
 	bool	load(const std::string &s) {return load(s.c_str());}	//Load a hex file from disk
 	void	write(const char *);			//Save hex data to a hex file
 	void	write(std::ostream &);			//Write all data to an output stream
-	void	truncate(size_type);			//Truncate all of the blocks to a given length
+	void	tidy(size_type length);			// Make things pretty
     };
 
     bool compare(hex_data&, hex_data&, value_type, hex_data::address_t, hex_data::address_t);
