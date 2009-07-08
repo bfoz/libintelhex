@@ -16,7 +16,7 @@ namespace intelhex
     #define	INH32M_HEADER	":020000040000FA"
 
     // Array access operator
-    hex_data::element_t &hex_data::operator[](hex_data::address_t address)
+    value_type& hex_data::operator[](hex_data::address_t address)
     {
 	// Start at the end of the list and find the first (last) block with an address
 	//  less than addr
@@ -37,7 +37,7 @@ namespace intelhex
 
     // FIXME Nasty kludge
     //  I should really create an iterator class to handle this
-    hex_data::element_t hex_data::get(address_t address, element_t blank)
+    value_type hex_data::get(address_t address, value_type blank)
     {
 	// Start at the end of the list and find the first (last) block with an address
 	//  less than addr
@@ -334,7 +334,7 @@ namespace intelhex
 
     //Compare two sets of hex data
     //	Return true if every word in hex1 has a corresponding, and equivalent, word in hex2
-    bool compare(hex_data& hex1, hex_data& hex2, hex_data::element_t mask, hex_data::address_t begin, hex_data::address_t end)
+    bool compare(hex_data& hex1, hex_data& hex2, value_type mask, hex_data::address_t begin, hex_data::address_t end)
     {
 	//Walk block list from hex1
 	for( hex_data::iterator i = hex1.begin(); i != hex1.end(); ++i )
@@ -347,7 +347,7 @@ namespace intelhex
 		    continue;
 
 		// Look for a corresponding element in hex2
-		const hex_data::element_t rhs = hex2.get(addr, mask);
+		const value_type rhs = hex2.get(addr, mask);
 		//Compare both sides through the given mask
 		if( ((*j) & mask) != (rhs & mask) )
 		    return false;

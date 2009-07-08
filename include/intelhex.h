@@ -18,14 +18,14 @@ namespace intelhex
     #define	HEX_FORMAT_INHX8M	0x01
     #define	HEX_FORMAT_INHX32	0x02
 
+    typedef uint8_t value_type;
 
     //The data set that results from parsing a hex file
     struct hex_data
     {
 	//Each line of the hex file generates a block of memory at a particular address
-	typedef	uint8_t	    element_t;				//Data element
 	typedef	uint32_t	address_t;
-	typedef	std::vector<element_t>	data_container;		//Element container
+	typedef	std::vector<value_type>	data_container;		//Element container
 	typedef	std::map<address_t, data_container> container;	//List of data blocks
 
 	typedef	container::iterator	iterator;
@@ -53,8 +53,8 @@ namespace intelhex
 
 	bool	isset(address_t);
 
-	element_t   &operator[](address_t);	//Array access operator
-	element_t   get(address_t, element_t);	//FIXME	Nasty kludge
+	value_type& operator[](address_t);	//Array access operator
+	value_type  get(address_t, value_type);	//FIXME	Nasty kludge
 
 	bool	load(const char *);			//Load a hex file from disk
 	bool	load(const std::string &s) {return load(s.c_str());}	//Load a hex file from disk
@@ -63,6 +63,6 @@ namespace intelhex
 	void	truncate(size_type);			//Truncate all of the blocks to a given length
     };
 
-    bool compare(hex_data&, hex_data&, hex_data::element_t, hex_data::address_t, hex_data::address_t);
+    bool compare(hex_data&, hex_data&, value_type, hex_data::address_t, hex_data::address_t);
 }
 #endif
