@@ -7,8 +7,8 @@
 #define INTELHEXH
 
 #include <fstream>
+#include <map>
 #include <vector>
-#include <list>
 
 #include <unistd.h>
 
@@ -23,24 +23,20 @@ namespace intelhex
     struct hex_data
     {
 	//Each line of the hex file generates a block of memory at a particular address
-	// pair<>.first is the address, pair<>.second is the data
-	typedef	uint8_t	    element_t;								//Data element
+	typedef	uint8_t	    element_t;				//Data element
 	typedef	uint32_t	address_t;
 	typedef	std::vector<element_t>	data_container;		//Element container
-	typedef	std::pair<address_t, data_container>	dblock;	//Data block container
-	typedef	std::list<dblock> lst_dblock;						//List of data blocks
+	typedef	std::map<address_t, data_container> container;	//List of data blocks
 
-	typedef	lst_dblock::iterator	iterator;
-	typedef	lst_dblock::reverse_iterator	reverse_iterator;
+	typedef	container::iterator	iterator;
+	typedef	container::reverse_iterator	reverse_iterator;
 	typedef	data_container::size_type	size_type;
     private:
 	char	format;				//Format of the parsed file (necessary?)
 	bool	segment_addr_rec;		// Uses/Has a segment address record
 	bool	linear_addr_rec;		// Uses/Has a linear address record
     public:
-	lst_dblock	blocks;			// List of data blocks
-						// I used a list instead of a vector since
-						//  the data set gets sorted a few times
+	container   blocks;			// List of data blocks
 
     public:
 	hex_data() : segment_addr_rec(false), linear_addr_rec(false) {}
@@ -51,7 +47,6 @@ namespace intelhex
 	iterator    begin() { return blocks.begin(); }
 	iterator    end() { return blocks.end(); }
 	void	clear();		//Delete everything
-	void	push_back(element_t);	//Add a word to the end of the set
 	size_type   size();
 	size_type   size_below_addr(address_t);
 	size_type   size_in_range(address_t, address_t);    //number of words in [lo, hi)
@@ -62,8 +57,6 @@ namespace intelhex
 	element_t   &operator[](address_t);	//Array access operator
 	element_t   get(address_t, element_t);	//FIXME	Nasty kludge
 
-	dblock	*new_block();				//Extend the array by one block
-	dblock	*add_block(address_t, size_type, element_t = 0xFFFF);	//Append a new block with address/length
 	bool	load(const char *);			//Load a hex file from disk
 	bool	load(const std::string &s) {return load(s.c_str());}	//Load a hex file from disk
 	void	write(const char *);			//Save hex data to a hex file

@@ -15,72 +15,45 @@ namespace intelhex
 
     #define	INH32M_HEADER	":020000040000FA"
 
-    //Extend the data block array by one element
-    //	and return a pointer to the new element
-    hex_data::dblock* hex_data::new_block()
-    {
-	dblock b;
-	blocks.push_back(b);
-	return &blocks.back();
-    }
-
-    // Extend the data block array by one element
-    //	and return a pointer to the new element
-    //	Initialize the element with address and length
-    hex_data::dblock* hex_data::add_block(address_t address, size_type length, element_t fill)
-    {
-	dblock db;	//A list of pointers would be faster, but this isn't too bad
-	blocks.push_back(db);
-	blocks.back().first = address;
-	blocks.back().second.resize(length, fill);
-	return &blocks.back();
-    }
-
     // Array access operator
-    // Assumes that the blocks have been sorted by address in ascending order
-    //	Sort order is maintained
-    hex_data::element_t &hex_data::operator[](hex_data::address_t addr)
+    hex_data::element_t &hex_data::operator[](hex_data::address_t address)
     {
-	if(blocks.size() == 0)	//Add a block if the sequence is empty
-	    add_block(0,0);
-
 	// Start at the end of the list and find the first (last) block with an address
 	//  less than addr
 	reverse_iterator i = blocks.rbegin();
-	while( (i!=blocks.rend()) && (i->first > addr))
+	while( i != blocks.rend() )
+	{
+	    if( i->first <= address )
+	    {
+		// Use the block if address is interior or adjacent to the block
+		if( (address - i->first) <= i->second.size() )
+		    return i->second[address - i->first];
+		break;
+	    }
 	    ++i;
-
-	address_t relative_addr = addr - i->first;
-	// If addr is outside of a block and not-adjacent to the end of any block add a new block
-	if( relative_addr > i->second.size() )
-	    return add_block(addr,1)->second[0];
-	// If addr is adjacent to the end of the block resize it
-	if( relative_addr == i->second.size() )
-	    i->second.resize(i->second.size()+1, 0xFFFF);
-
-	return i->second[relative_addr];
+	}
+	return blocks[address][0];
     }
 
     // FIXME Nasty kludge
     //  I should really create an iterator class to handle this
-    hex_data::element_t hex_data::get(address_t addr, element_t blank)
+    hex_data::element_t hex_data::get(address_t address, element_t blank)
     {
 	// Start at the end of the list and find the first (last) block with an address
 	//  less than addr
 	reverse_iterator i = blocks.rbegin();
-	while( (i!=blocks.rend()) && (i->first > addr))
+	while( i != blocks.rend() )
+	{
+	    if( i->first <= address )
+	    {
+		// Use the block if address is interior or adjacent to the block
+		if( (address - i->first) <= i->second.size() )
+		    return i->second[address - i->first];
+		break;
+	    }
 	    ++i;
-
-	// If no block can be found, return the blank value
-	if( i == blocks.rend() )
-	    return blank;
-
-	element_t relative_addr = addr - i->first;
-	// If relative_addr is past the end of the block, return blank
-	if( relative_addr >= i->second.size() )
-	    return blank;
-
-	return i->second[relative_addr];
+	}
+	return blank;
     }
 
     // Delete all allocated memory
@@ -88,15 +61,6 @@ namespace intelhex
     {
 	format = HEX_FORMAT_INHX8M;
 	blocks.clear();
-    }
-
-    // Add a new word to the end of the sequence
-    //  Assumes the sequence has been sorted
-    void hex_data::push_back(hex_data::element_t a)
-    {
-	if(blocks.size() == 0)	//Add a block if the sequence is empty
-	    add_block(0,0);
-	blocks.back().second.push_back(a);	//Append the new word
     }
 
     hex_data::size_type hex_data::size()
@@ -190,10 +154,8 @@ namespace intelhex
     bool hex_data::load(const char *path)
     {
 	FILE	*fp;
-	dblock	*db;		//Temporary pointer
 	unsigned int	address, count, rtype, i;
 	uint16_t	linear_address(0);
-	uint32_t	a;
 
 	if( (fp=fopen(path, "r"))==NULL )
 	{
@@ -211,17 +173,17 @@ namespace intelhex
 		fscanf(fp, "%4x", &address);	//Read in address
 		fscanf(fp, "%2x", &rtype);	//Read type
 
-		unsigned numWords(count);	//Convert byte count to word count
-
 		switch(rtype)	//What type of record?
 		{
 		    case 0: 	//Data block so store it
+		    {
 			//Make a data block
-			a = (static_cast<uint32_t>(linear_address) << 16) + address;
-			db = add_block(a, numWords);
-			for(i=0; i<numWords; i++)			//Read all of the data bytes
-			    fscanf(fp, "%2x", (unsigned*)&db->second[i]);
+			data_container& b = blocks[(static_cast<uint32_t>(linear_address) << 16) + address];
+			b.resize(count);
+			for(i=0; i < count; i++)			//Read all of the data bytes
+			    fscanf(fp, "%2hhx", &(b[i]));
 			break;
+		    }
 		    case 1:	//EOF
 			break;
 		    case 2:	//Segment address record (INHX32)
@@ -249,7 +211,6 @@ namespace intelhex
 	}
 	fclose(fp);
 
-	blocks.sort();		//Sort the data blocks by address (ascending)
 	return true;
     }
 
@@ -277,8 +238,6 @@ namespace intelhex
 	    std::cerr << "Couldn't open the output file stream\n";
 	    exit(1);
 	}
-
-	blocks.sort();				//Sort the data blocks by address (ascending)
 
 	os.setf(std::ios::hex, std::ios::basefield);	//Set the stream to ouput hex instead of decimal
 	os.setf(std::ios::uppercase);			//Use uppercase hex notation
@@ -356,31 +315,25 @@ namespace intelhex
     }
 
     // Truncate all of the blocks to a given length
-    //  Maintains sort order
     void hex_data::truncate(hex_data::size_type len)
     {
 	for(iterator i=blocks.begin(); i!=blocks.end(); i++)
 	{
 	    if(i->second.size() > len)	//If the block is too long...
 	    {
-		//Insert a new block
-		iterator j(i);
-		j = blocks.insert(++j, dblock());
-		j->first = i->first + len;		//Give the new block an address
-
 		//Make an interator that points to the first element to copy out of i->second
-		dblock::second_type::iterator k(i->second.begin());
+		data_container::iterator k(i->second.begin());
 		advance(k, len);
 
-		j->second.assign(k, i->second.end());	//Assign the extra bytes to the new block
-		i->second.erase(k, i->second.end());	//Truncate the original block
+		// Assign the extra elements to a new block and truncate the original
+		blocks[i->first + len].assign(k, i->second.end());
+		i->second.erase(k, i->second.end());
 	    }
 	}
     }
 
     //Compare two sets of hex data
     //	Return true if every word in hex1 has a corresponding, and equivalent, word in hex2
-    //	Assumes both data sets are sorted
     bool compare(hex_data& hex1, hex_data& hex2, hex_data::element_t mask, hex_data::address_t begin, hex_data::address_t end)
     {
 	//Walk block list from hex1
