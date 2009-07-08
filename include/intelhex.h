@@ -32,20 +32,23 @@ namespace intelhex
 	typedef	container::reverse_iterator	reverse_iterator;
 	typedef	data_container::size_type	size_type;
     private:
+	value_type  _fill;	    // Value returned for unset addresses
 	char	format;				//Format of the parsed file (necessary?)
 	bool	segment_addr_rec;		// Uses/Has a segment address record
 	bool	linear_addr_rec;		// Uses/Has a linear address record
 	container   blocks;			// List of data blocks
 
     public:
-	hex_data() : segment_addr_rec(false), linear_addr_rec(false) {}
-	hex_data(const std::string &s) : segment_addr_rec(false), linear_addr_rec(false)
+	hex_data() : _fill(0), segment_addr_rec(false), linear_addr_rec(false) {}
+	hex_data(const std::string &s) : _fill(0), segment_addr_rec(false), linear_addr_rec(false)
 	{
 	    load(s);
 	}
 	iterator    begin() { return blocks.begin(); }
 	iterator    end() { return blocks.end(); }
 	void	clear();		//Delete everything
+	value_type  fill()  { return _fill; }
+	void	    fill(value_type f)  { _fill = f; }
 	size_type   size();
 	size_type   size_below_addr(address_t);
 	size_type   size_in_range(address_t, address_t);    //number of words in [lo, hi)
@@ -54,7 +57,7 @@ namespace intelhex
 	bool	isset(address_t);
 
 	value_type& operator[](address_t);	//Array access operator
-	value_type  get(address_t, value_type);	//FIXME	Nasty kludge
+	value_type  get(address_t);		//FIXME	Nasty kludge
 
 	bool	load(const char *);			//Load a hex file from disk
 	bool	load(const std::string &s) {return load(s.c_str());}	//Load a hex file from disk

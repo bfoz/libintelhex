@@ -37,7 +37,7 @@ namespace intelhex
 
     // FIXME Nasty kludge
     //  I should really create an iterator class to handle this
-    value_type hex_data::get(address_t address, value_type blank)
+    value_type hex_data::get(address_t address)
     {
 	// Start at the end of the list and find the first (last) block with an address
 	//  less than addr
@@ -53,12 +53,13 @@ namespace intelhex
 	    }
 	    ++i;
 	}
-	return blank;
+	return _fill;
     }
 
     // Delete all allocated memory
     void hex_data::clear()
     {
+	_fill = 0;
 	format = HEX_FORMAT_INHX8M;
 	blocks.clear();
     }
@@ -347,10 +348,8 @@ namespace intelhex
 		if( (addr < begin) || (addr > end) )
 		    continue;
 
-		// Look for a corresponding element in hex2
-		const value_type rhs = hex2.get(addr, mask);
 		//Compare both sides through the given mask
-		if( ((*j) & mask) != (rhs & mask) )
+		if( ((*j) & mask) != (hex2.get(addr) & mask) )
 		    return false;
 	    }
 	}
