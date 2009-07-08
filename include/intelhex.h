@@ -35,7 +35,6 @@ namespace intelhex
 	char	format;				//Format of the parsed file (necessary?)
 	bool	segment_addr_rec;		// Uses/Has a segment address record
 	bool	linear_addr_rec;		// Uses/Has a linear address record
-    public:
 	container   blocks;			// List of data blocks
 
     public:
