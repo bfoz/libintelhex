@@ -58,6 +58,7 @@ namespace intelhex
 
 	value_type& operator[](address_t);	//Array access operator
 	value_type  get(address_t);		//FIXME	Nasty kludge
+	void	set(address_t, value_type);	// Set the value at address
 
 	bool	load(const char *);			//Load a hex file from disk
 	bool	load(const std::string &s) {return load(s.c_str());}	//Load a hex file from disk

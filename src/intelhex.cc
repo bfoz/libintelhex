@@ -56,6 +56,38 @@ namespace intelhex
 	return _fill;
     }
 
+    // Set the value at address or create a new element using value
+    void hex_data::set(address_t address, value_type value)
+    {
+	if( value == fill() )	// Ignore fill values
+	    return;
+
+	// Start at the end of the list and find the first (last) block with an address
+	//  less than addr
+	reverse_iterator i = blocks.rbegin();
+	while( i != blocks.rend() )
+	{
+	    if( i->first <= address )
+	    {
+		// Use the block if address is interior or adjacent to the block
+		const address_t index = address - i->first;
+		if( index < i->second.size() )
+		{
+		    i->second[index] = value;
+		    return;
+		}
+		else if( index == i->second.size() )
+		{
+		    i->second.push_back(value);
+		    return;
+		}
+		break;
+	    }
+	    ++i;
+	}
+	blocks[address].push_back(value);	// Otherwise create a new block
+    }
+
     // Delete all allocated memory
     void hex_data::clear()
     {
