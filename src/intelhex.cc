@@ -35,8 +35,7 @@ namespace intelhex
 	return blocks[address][0];
     }
 
-    // FIXME Nasty kludge
-    //  I should really create an iterator class to handle this
+    // Return the value at address, or _fill if not set
     value_type hex_data::get(address_t address)
     {
 	// Start at the end of the list and find the first (last) block with an address
@@ -46,8 +45,8 @@ namespace intelhex
 	{
 	    if( i->first <= address )
 	    {
-		// Use the block if address is interior or adjacent to the block
-		if( (address - i->first) <= i->second.size() )
+		// Use the block if address is interior to the block
+		if( (address - i->first) < i->second.size() )
 		    return i->second[address - i->first];
 		break;
 	    }
