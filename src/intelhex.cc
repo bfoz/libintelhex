@@ -92,6 +92,8 @@ namespace intelhex
     {
 	_fill = 0;
 	format = HEX_FORMAT_INHX8M;
+	linear_addr_rec = false;
+	segment_addr_rec = false;
 	blocks.clear();
     }
 
