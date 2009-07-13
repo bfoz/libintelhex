@@ -246,6 +246,104 @@ namespace intelhex
 	return true;
     }
 
+    // Convert a string from hex to binary and append it to a block
+    uint8_t hex2binary(hex_data::data_container& to, std::string& from)
+    {
+	value_type    sum = 0, a;
+	std::string::iterator i = from.begin();
+
+	while( i != from.end() )
+	{
+	    sscanf(&(*i), "%2hhx", &a);
+	    to.push_back(a);
+	    sum += a;
+	    i += 2;
+	}
+
+	return sum;
+    }
+
+    // Read data from an input stream
+    void hex_data::read(std::istream &s)
+    {
+	address_t   address;
+	address_t   linear_address(0);
+	std::string line;
+	data_container buffer;
+
+	while( (s.get() == ':') && s.good() )
+	{
+	    getline(s, line);		    // Read the whole line
+	    if( line.size() <= 10 )	    // Ignore truncated lines
+		break;
+	    buffer.clear();
+	    buffer.reserve(line.size()/2);  // Pre-allocate
+	    if( hex2binary(buffer, line) )  // Ignore lines with bad checksums
+		break;
+
+	    address = buffer[1];
+	    address = (address << 8) | buffer[2];
+	    unsigned length = buffer[0];
+	    const unsigned type = buffer[3];
+	    value_type* data = &buffer[4];
+
+	    switch(type)
+	    {
+		case 0: 	//Data block
+		{
+		    address += linear_address;
+		    iterator i = blocks.begin();
+		    for(; i != blocks.end(); ++i )  // Find a block that includes address
+		    {
+			address_t num = 0;
+			// If the start of the new block is interior to an existing block...
+			if( (i->first <= address) && ( (i->first + i->second.size()) > address) )
+			{
+			    // Store the portion of the new block that overlaps the existing block
+			    const size_type index = address - i->first;
+			    num = i->second.size() - index;
+			    if( num > length )
+				num = length;
+			    std::copy(data, data+num, &(i->second[index]));
+			}
+			// If the end of the new block is interior to an existing block...
+			if( (address < i->first) && ((address + length) > i->first) )
+			{
+			    // Create a new block for the non-overlapping portion
+			    num = i->first - address;
+			    if( num > length )
+				num = length;
+			    blocks[address].assign(data, data+num);
+			}
+			length -= num;
+			address += num;
+			data += num;
+			// Bail out early if there's nothing left to do
+			if( 0 == length )
+			    break;
+		    }
+		    // Handle any leftover bytes
+		    if( length )
+			blocks[address].assign(data, data+length);
+		    break;
+		}
+		case 1: break;	// Ignore EOF record
+		case 2:		// Segment address record (INHX32)
+		    segment_addr_rec = true;
+		    break;
+		case 4:		// Linear address record (INHX32)
+		    if( (0 == address) && (2 == length) )
+		    {
+			linear_address = buffer[4];
+			linear_address = (linear_address << 8) | buffer[5];
+			linear_address <<= 16;
+			linear_addr_rec = true;
+		    }
+		    break;
+	    }
+	}
+    }
+
     // Write all data to a file
     void hex_data::write(const char *path)
     {

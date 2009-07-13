@@ -62,6 +62,7 @@ namespace intelhex
 
 	bool	load(const char *);			//Load a hex file from disk
 	bool	load(const std::string &s) {return load(s.c_str());}	//Load a hex file from disk
+	void	read(std::istream &);			// Read data from an input stream
 	void	write(const char *);			//Save hex data to a hex file
 	void	write(std::ostream &);			//Write all data to an output stream
 	void	tidy(size_type length);			// Make things pretty
