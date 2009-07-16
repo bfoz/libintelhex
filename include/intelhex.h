@@ -46,6 +46,7 @@ namespace intelhex
 	}
 	iterator    begin() { return blocks.begin(); }
 	iterator    end() { return blocks.end(); }
+	void	compact();		// Merge adjacent blocks
 	void	clear();		//Delete everything
 	value_type  fill()  { return _fill; }
 	void	    fill(value_type f)  { _fill = f; }

@@ -87,6 +87,24 @@ namespace intelhex
 	blocks[address].push_back(value);	// Otherwise create a new block
     }
 
+    // Merge adjacent blocks
+    void hex_data::compact()
+    {
+	iterator previous = blocks.begin();
+	iterator i = previous;
+
+	for(++i; i != blocks.end(); ++i)
+	{
+	    if( (previous->first + previous->second.size()) == i->first )
+	    {
+		previous->second.insert(previous->second.end(), i->second.begin(), i->second.end());
+		blocks.erase(i);
+		i = previous;
+	    }
+	    previous = i;
+	}
+    }
+
     // Delete all allocated memory
     void hex_data::clear()
     {
