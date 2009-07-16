@@ -368,11 +368,8 @@ namespace intelhex
     void hex_data::write(const char *path)
     {
 	std::ofstream	ofs(path);
-	if(!ofs)
-	{
-	    std::cerr << "Couldn't open the output file stream\n";
-	    exit(1);
-	}
+	if( !ofs )	// Bail out on bad files
+	    return;
 	write(ofs);
 	ofs.close();
     }
@@ -383,11 +380,8 @@ namespace intelhex
 	uint8_t	checksum;
 	uint16_t	linear_address(0);
 
-	if(!os)
-	{
-	    std::cerr << "Couldn't open the output file stream\n";
-	    exit(1);
-	}
+	if( !os )	    // Bail out on bad streams
+	    return;
 
 	os.setf(std::ios::hex, std::ios::basefield);	//Set the stream to ouput hex instead of decimal
 	os.setf(std::ios::uppercase);			//Use uppercase hex notation
