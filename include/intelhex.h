@@ -6,7 +6,7 @@
 #ifndef INTELHEXH
 #define INTELHEXH
 
-#include <fstream>
+#include <iostream>
 #include <map>
 #include <vector>
 
@@ -61,8 +61,7 @@ namespace intelhex
 	value_type  get(address_t);		// Return the value at address
 	void	set(address_t, value_type);	// Set the value at address
 
-	bool	load(const char *);			//Load a hex file from disk
-	bool	load(const std::string &s) {return load(s.c_str());}	//Load a hex file from disk
+	void	load(const std::string&);	// Load from a file
 	void	read(std::istream &);			// Read data from an input stream
 	void	write(const char *);			//Save hex data to a hex file
 	void	write(std::ostream &);			//Write all data to an output stream

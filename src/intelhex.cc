@@ -3,7 +3,7 @@
     Copyright 2002 Brandon Fosdick (BSD License)
 */
 
-#include <iostream>
+#include <fstream>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -201,69 +201,11 @@ namespace intelhex
 	    return true;
     }
 
-    // Load a hex file from disk
-    //  Destroys any data that has already been loaded
-    bool hex_data::load(const char *path)
+    // Load from a file
+    void hex_data::load(const std::string &path)
     {
-	FILE	*fp;
-	unsigned int	address, count, rtype, i;
-	uint16_t	linear_address(0);
-
-	if( (fp=fopen(path, "r"))==NULL )
-	{
-	    return false;
-	}
-
-	clear();		//First, clean house
-
-	// Start parsing the file
-	while(!feof(fp))
-	{
-	    if(fgetc(fp)==':')	//First character of every line should be ':'
-	    {
-		fscanf(fp, "%2x", &count);	//Read in byte count
-		fscanf(fp, "%4x", &address);	//Read in address
-		fscanf(fp, "%2x", &rtype);	//Read type
-
-		switch(rtype)	//What type of record?
-		{
-		    case 0: 	//Data block so store it
-		    {
-			//Make a data block
-			data_container& b = blocks[(static_cast<uint32_t>(linear_address) << 16) + address];
-			b.resize(count);
-			for(i=0; i < count; i++)			//Read all of the data bytes
-			    fscanf(fp, "%2hhx", &(b[i]));
-			break;
-		    }
-		    case 1:	//EOF
-			break;
-		    case 2:	//Segment address record (INHX32)
-			segment_addr_rec = true;
-			break;
-		    case 4:	//Linear address record (INHX32)
-			if( (0 == address) && (2 == count) )
-			{
-			    fscanf(fp, "%04hx", &linear_address);	//Get the new linear address
-			    linear_addr_rec = true;
-			}
-			else
-			{
-			    //FIXME	There's a problem
-			}
-			break;
-		}
-		fscanf(fp,"%*[^\n]\n");		//Ignore the checksum and the newline
-	    }
-	    else
-	    {
-		printf("%s: Bad line\n", __FUNCTION__);
-		fscanf(fp, "%*[^\n]\n");	//Ignore the rest of the line
-	    }
-	}
-	fclose(fp);
-
-	return true;
+	std::ifstream f(path.c_str());
+	read(f);
     }
 
     // Convert a string from hex to binary and append it to a block
