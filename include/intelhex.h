@@ -18,6 +18,8 @@ namespace intelhex
     #define	HEX_FORMAT_INHX8M	0x01
     #define	HEX_FORMAT_INHX32	0x02
 
+    class   hex_data;
+    typedef hex_data container;
     typedef uint8_t value_type;
 
     //The data set that results from parsing a hex file
