@@ -186,6 +186,18 @@ namespace intelhex
 	    return s;
     }
 
+    // Lowest address
+    hex_data::address_t hex_data::min_address() const
+    {
+	return blocks.begin()->first;
+    }
+
+    // Highest address
+    hex_data::address_t hex_data::max_address() const
+    {
+	return blocks.rbegin()->first + blocks.rbegin()->second.size() - 1;
+    }
+
     //Return true if an element exists at addr
     bool hex_data::isset(address_t addr)
     {

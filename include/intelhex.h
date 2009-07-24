@@ -48,6 +48,7 @@ namespace intelhex
 	}
 	iterator    begin() { return blocks.begin(); }
 	iterator    end() { return blocks.end(); }
+
 	void	compact();		// Merge adjacent blocks
 	void	clear();		//Delete everything
 	value_type  fill()  { return _fill; }
@@ -56,6 +57,9 @@ namespace intelhex
 	size_type   size_below_addr(address_t);
 	size_type   size_in_range(address_t, address_t);    //number of words in [lo, hi)
 	address_t   max_addr_below(address_t);
+
+	address_t   min_address() const;	// Lowest address
+	address_t   max_address() const;	// Highest address
 
 	bool	isset(address_t);
 
