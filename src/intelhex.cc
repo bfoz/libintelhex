@@ -115,6 +115,55 @@ namespace intelhex
 	blocks.clear();
     }
 
+    // Erase [first, last]
+    void hex_data::erase(address_t first, address_t last)
+    {
+	if( first > last )
+	    std::swap(first, last);
+
+	for(iterator i=blocks.begin(); (i!=blocks.end()) && (first<=last); ++i)
+	{
+	    const address_t ope = i->first + i->second.size();
+	    if( first >= ope )	// Ignore all blocks with addresses < first
+		continue;
+	    // The blocks are sorted, so if the first byte to be deleted is
+	    //  before the block it must be a blank address that's either
+	    //  before the first block or after any previous blocks.
+	    if( first < i->first )
+	    {
+		if( last < i->first )	// If the entire range is before the
+		    return;		//  block there's nothing left to do
+		first = i->first;   // Advance to the next non-blank address
+	    }
+	    // first is now guaranteed to be >= i->first and < ope
+	    if( last < ope )	// Entire range is interior
+	    {
+		// Copy trailing portion of the old block to a new block
+		if( (ope - last) > 1 )
+		{
+		    const address_t index = last-i->first+1;
+		    blocks[last+1].assign(i->second.begin()+index, i->second.end());
+		}
+		// Truncate or delete old block
+		const address_t size = first - i->first;
+		if( size )
+		    i->second.resize(size);
+		else
+		    blocks.erase(i);
+		return;
+	    }
+	    else	// Truncate block
+	    {
+		const address_t size = first - i->first;
+		if( size )
+		    i->second.resize(size);
+		else
+		    blocks.erase(i--);
+		first = ope;
+	    }
+	}
+    }
+
     hex_data::size_type hex_data::size()
     {
 	size_type s=0;
