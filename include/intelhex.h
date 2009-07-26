@@ -20,15 +20,15 @@ namespace intelhex
 
     class   hex_data;
     typedef hex_data container;
+    typedef uint32_t address_type;
     typedef uint8_t value_type;
 
     //The data set that results from parsing a hex file
     struct hex_data
     {
 	//Each line of the hex file generates a block of memory at a particular address
-	typedef	uint32_t	address_t;
 	typedef	std::vector<value_type>	data_container;		//Element container
-	typedef	std::map<address_t, data_container> container;	//List of data blocks
+	typedef	std::map<address_type, data_container> container;   //List of data blocks
 
 	typedef	container::iterator	iterator;
 	typedef	container::reverse_iterator	reverse_iterator;
@@ -51,22 +51,22 @@ namespace intelhex
 
 	void	compact();		// Merge adjacent blocks
 	void	clear();		//Delete everything
-	void	erase(address_t first, address_t last);	// Erase [first, last]
+	void 	erase(address_type first, address_type last);  // Erase [first, last]
 	value_type  fill()  { return _fill; }
 	void	    fill(value_type f)  { _fill = f; }
 	size_type   size();
-	size_type   size_below_addr(address_t);
-	size_type   size_in_range(address_t, address_t);    //number of words in [lo, hi)
-	address_t   max_addr_below(address_t);
+	size_type   size_below_addr(address_type);
+	size_type   size_in_range(address_type, address_type);    //number of words in [lo, hi)
+	address_type   max_addr_below(address_type);
 
-	address_t   min_address() const;	// Lowest address
-	address_t   max_address() const;	// Highest address
+	address_type   min_address() const;	// Lowest address
+	address_type   max_address() const;	// Highest address
 
-	bool	isset(address_t);
+	bool	isset(address_type);
 
-	value_type& operator[](address_t);	//Array access operator
-	value_type  get(address_t);		// Return the value at address
-	void	set(address_t, value_type);	// Set the value at address
+	value_type& operator[](address_type);	//Array access operator
+	value_type  get(address_type);		// Return the value at address
+	void	set(address_type, value_type);	// Set the value at address
 
 	void	load(const std::string&);	// Load from a file
 	void	read(std::istream &);			// Read data from an input stream
@@ -75,6 +75,6 @@ namespace intelhex
 	void	tidy(size_type length);			// Make things pretty
     };
 
-    bool compare(hex_data&, hex_data&, value_type, hex_data::address_t, hex_data::address_t);
+    bool compare(hex_data&, hex_data&, value_type, address_type, address_type);
 }
 #endif
