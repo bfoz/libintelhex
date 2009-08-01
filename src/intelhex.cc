@@ -115,6 +115,37 @@ namespace intelhex
 	blocks.clear();
     }
 
+    // Erase a single element at the given address
+    void hex_data::erase(address_type address)
+    {
+	for(iterator i=blocks.begin(); i!=blocks.end(); ++i)
+	{
+	    // The blocks are sorted, so if the byte to be deleted is
+	    //  before the block it must be a blank address that's either
+	    //  before the first block or after any previous blocks.
+	    if( address < i->first )
+		break;
+	    // Ignore the block if address is past the end of the block
+	    const address_type ope = i->first + i->second.size();
+	    if( address >= ope )
+		continue;
+	    // address is now guaranteed to be >= i->first and < ope
+	    // Copy trailing portion of the old block to a new block
+	    if( (ope - address) > 1 )
+	    {
+		const address_type index = address-i->first+1;
+		blocks[address+1].assign(i->second.begin()+index, i->second.end());
+	    }
+	    // Truncate or delete old block
+	    const address_type size = address - i->first;
+	    if( size )
+		i->second.resize(size);
+	    else
+		blocks.erase(i);
+	    break;
+	}
+    }
+
     // Erase [first, last]
     void hex_data::erase(address_type first, address_type last)
     {

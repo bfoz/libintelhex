@@ -51,6 +51,7 @@ namespace intelhex
 
 	void	compact();		// Merge adjacent blocks
 	void	clear();		//Delete everything
+	void	erase(address_type);	// Erase a single element
 	void 	erase(address_type first, address_type last);  // Erase [first, last]
 	value_type  fill()  { return _fill; }
 	void	    fill(value_type f)  { _fill = f; }
