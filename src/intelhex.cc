@@ -58,8 +58,11 @@ namespace intelhex
     // Set the value at address or create a new element using value
     void hex_data::set(address_type address, value_type value)
     {
-	if( value == fill() )	// Ignore fill values
+	if( value == fill() )	// Handle fill values
+	{
+	    erase(address);	// If the address is already set, erase it
 	    return;
+	}
 
 	// Start at the end of the list and find the first (last) block with an address
 	//  less than addr
