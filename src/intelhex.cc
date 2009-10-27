@@ -306,15 +306,35 @@ namespace intelhex
     // Convert a string from hex to binary and append it to a block
     uint8_t hex2binary(hex_data::data_container& to, std::string& from)
     {
-	value_type    sum = 0, a;
+	value_type    sum = 0, value;
+	uint8_t character;
+	bool first = true;
 	std::string::iterator i = from.begin();
 
 	while( i != from.end() )
 	{
-	    sscanf(&(*i), "%2hhx", &a);
-	    to.push_back(a);
-	    sum += a;
-	    i += 2;
+	    character = *i;
+
+	    if( (character >= '0') && (character <= '9') )
+		character -= '0';
+	    else if( (character >= 'A') && (character <= 'Z') )
+		character -= 'A' - 10;
+	    else if( (character >= 'a') && (character <= 'z') )
+		character -= 'a' - 10;
+	    else
+		break;	// Bad character
+
+	    if( first )
+		value = character << 4;
+	    else
+	    {
+		value |= character;
+		to.push_back(value);
+		sum += value;
+	    }
+
+	    first = !first;
+	    ++i;
 	}
 
 	return sum;
