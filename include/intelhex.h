@@ -9,7 +9,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
-
+#include <stdint.h>
 #include <unistd.h>
 
 namespace intelhex
