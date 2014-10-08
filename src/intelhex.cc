@@ -282,7 +282,7 @@ namespace intelhex
     }
 
     //Return true if an element exists at addr
-    bool hex_data::isset(address_type addr)
+    bool hex_data::is_set(address_type addr)
     {
 	// Start at the end of the list and find the first (last) block with an address
 	//  less than addr

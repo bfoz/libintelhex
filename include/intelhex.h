@@ -63,7 +63,7 @@ namespace intelhex
 	address_type   min_address() const;	// Lowest address
 	address_type   max_address() const;	// Highest address
 
-	bool	isset(address_type);
+	bool	is_set(address_type);
 
 	value_type& operator[](address_type);	//Array access operator
 	value_type  get(address_type);		// Return the value at address
