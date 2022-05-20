@@ -32,7 +32,7 @@ namespace intelhex
 	    }
 	    ++i;
 	}
-	return blocks[address][0];
+	return _fill;
     }
 
     // Return the value at address, or _fill if not set
