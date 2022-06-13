@@ -344,7 +344,7 @@ namespace intelhex
     void hex_data::read(std::istream &s)
     {
 	address_type   address;
-	address_type   linear_address(0);
+	address_type   extended_address(0);
 	std::string line;
 	data_container buffer;
 
@@ -368,7 +368,7 @@ namespace intelhex
 	    {
 		case 0: 	//Data block
 		{
-		    address += linear_address;
+		    address += extended_address;
 		    iterator i = blocks.begin();
 		    for(; i != blocks.end(); ++i )  // Find a block that includes address
 		    {
@@ -406,14 +406,20 @@ namespace intelhex
 		}
 		case 1: break;	// Ignore EOF record
 		case 2:		// Segment address record (INHX32)
-		    segment_addr_rec = true;
+		    if( (0 == address) && (2 == length) )
+		    {
+			extended_address = buffer[4];
+			extended_address = (extended_address << 8) | buffer[5];
+			extended_address <<= 4;
+			segment_addr_rec = true;
+		    }
 		    break;
 		case 4:		// Linear address record (INHX32)
 		    if( (0 == address) && (2 == length) )
 		    {
-			linear_address = buffer[4];
-			linear_address = (linear_address << 8) | buffer[5];
-			linear_address <<= 16;
+			extended_address = buffer[4];
+			extended_address = (extended_address << 8) | buffer[5];
+			extended_address <<= 16;
 			linear_addr_rec = true;
 		    }
 		    break;
