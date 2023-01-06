@@ -56,9 +56,9 @@ namespace intelhex
     }
 
     // Set the value at address or create a new element using value
-    void hex_data::set(address_type address, value_type value)
+    void hex_data::set(address_type address, value_type value, bool ignore_fill)
     {
-	if( value == fill() )	// Handle fill values
+	if( !ignore_fill && value == fill() )	// Handle fill values
 	{
 	    erase(address);	// If the address is already set, erase it
 	    return;
