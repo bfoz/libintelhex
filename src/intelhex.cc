@@ -290,7 +290,7 @@ namespace intelhex
 	while( (i!=blocks.rend()) && (i->first > addr))
 	    ++i;
 
-	if( (addr - i->first) > i->second.size() )
+	if( (addr - i->first) >= i->second.size() )
 	    return false;
 	else
 	    return true;
