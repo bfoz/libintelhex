@@ -67,7 +67,7 @@ namespace intelhex
 
 	value_type& operator[](address_type);	//Array access operator
 	value_type  get(address_type);		// Return the value at address
-	void	set(address_type, value_type);	// Set the value at address
+	void	set(address_type, value_type, bool ignore_fill=false);	// Set the value at address
 
 	void	load(const std::string&);	// Load from a file
 	void	read(std::istream &);			// Read data from an input stream
