@@ -56,9 +56,9 @@ namespace intelhex
     }
 
     // Set the value at address or create a new element using value
-    void hex_data::set(address_type address, value_type value)
+    void hex_data::set(address_type address, value_type value, bool ignore_fill)
     {
-	if( value == fill() )	// Handle fill values
+	if( !ignore_fill && value == fill() )	// Handle fill values
 	{
 	    erase(address);	// If the address is already set, erase it
 	    return;
@@ -93,19 +93,21 @@ namespace intelhex
     // Merge adjacent blocks
     void hex_data::compact()
     {
-	iterator previous = blocks.begin();
-	iterator i = previous;
+        if (blocks.size() > 0) {
+            iterator previous = blocks.begin();
+            iterator i = previous;
 
-	for(++i; i != blocks.end(); ++i)
-	{
-	    if( (previous->first + previous->second.size()) == i->first )
-	    {
-		previous->second.insert(previous->second.end(), i->second.begin(), i->second.end());
-		blocks.erase(i);
-		i = previous;
-	    }
-	    previous = i;
-	}
+            for(++i; i != blocks.end(); ++i)
+            {
+                if( (previous->first + previous->second.size()) == i->first )
+                {
+                    previous->second.insert(previous->second.end(), i->second.begin(), i->second.end());
+                    blocks.erase(i);
+                    i = previous;
+                }
+                previous = i;
+            }
+        }
     }
 
     // Delete all allocated memory
