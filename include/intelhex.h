@@ -10,8 +10,6 @@
 #include <map>
 #include <vector>
 
-#include <unistd.h>
-
 namespace intelhex
 {
 

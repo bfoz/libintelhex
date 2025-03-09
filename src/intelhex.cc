@@ -3,12 +3,10 @@
     Copyright 2002 Brandon Fosdick (BSD License)
 */
 
-#include <fstream>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "intelhex.h"
+
+#include <fstream>
+#include <string>
 
 namespace intelhex
 {
@@ -350,7 +348,7 @@ namespace intelhex
 
 	while( (s.get() == ':') && s.good() )
 	{
-	    getline(s, line);		    // Read the whole line
+	    std::getline(s, line);		    // Read the whole line
 	    if( line.size() <= 10 )	    // Ignore truncated lines
 		break;
 	    buffer.clear();
