@@ -5,7 +5,7 @@
 
 #ifndef INTELHEXH
 #define INTELHEXH
-
+#include <stdint.h>
 #include <iostream>
 #include <map>
 #include <vector>
