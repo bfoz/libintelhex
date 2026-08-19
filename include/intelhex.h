@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <unistd.h>
+#include <cstdint>
 
 namespace intelhex
 {
